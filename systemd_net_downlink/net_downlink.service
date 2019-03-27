@@ -5,10 +5,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/pi/2.4GHz/sx1302_hal_proto/util_net_downlink
-#ExecStart=/home/pi/2.4GHz/sx1302_hal_proto/util_net_downlink/net_downlink -P 1730 -l log.csv
-ExecStart=/bin/bash -c "/home/pi/2.4GHz/sx1302_hal_proto/util_net_downlink/net_downlink -P 1730 -l /home/pi/2.4GHz/packet_logs/log_$${SECONDS}_$${RANDOM}.csv"
-#ExecStartPre=/home/lora/github/lora_gateway/reset_lgw.sh start
+WorkingDirectory=/home/pi/thalatta_rpi/net_downlink/util_net_downlink
+ExecStart=/bin/bash -c "/home/pi/thalatta_rpi/net_downlink/util_net_downlink/net_downlink -P 1730 -l /home/pi/thalatta_rpi/packet_logs/log_$${RANDOM}.csv"
 Restart=always
 RestartSec=30
 StandardOutput=syslog
