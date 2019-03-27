@@ -1,6 +1,6 @@
 # Dependencies
 
-* uhubctl: to control power on USB ports (reset GWs)
+* uhubctl: to control power on USB ports (reset GWs) <br/>
 https://github.com/mvp/uhubctl.git
 
 # Cron setup
