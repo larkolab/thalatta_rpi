@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Ping google DNS servers
 #  if no answer, restart the network
 ping -q -c 2 -I eth0 8.8.8.8
