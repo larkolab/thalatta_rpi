@@ -1,0 +1,19 @@
+[Unit]
+Description=LoRa24 Packet Logger
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pi/2.4GHz/sx1302_hal_proto/util_net_downlink
+#ExecStart=/home/pi/2.4GHz/sx1302_hal_proto/util_net_downlink/net_downlink -P 1730 -l log.csv
+ExecStart=/bin/bash -c "/home/pi/2.4GHz/sx1302_hal_proto/util_net_downlink/net_downlink -P 1730 -l /home/pi/2.4GHz/packet_logs/log_$${SECONDS}_$${RANDOM}.csv"
+#ExecStartPre=/home/lora/github/lora_gateway/reset_lgw.sh start
+Restart=always
+RestartSec=30
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=net_downlink
+
+[Install]
+WantedBy=multi-user.target

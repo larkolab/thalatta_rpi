@@ -1,0 +1,16 @@
+[Unit]
+Description=Thalatta Email
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/pi/2.4GHz
+ExecStart=/usr/bin/python /home/pi/2.4GHz/set_email.py
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=thalatta_email
+
+[Install]
+WantedBy=multi-user.target
