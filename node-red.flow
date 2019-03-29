@@ -1,0 +1,175 @@
+[
+    {
+        "id": "370ea38b.107aa4",
+        "type": "tab",
+        "label": "Thalatta",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "23e558ad.38271",
+        "type": "inject",
+        "z": "370ea38b.107aa4",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 150,
+        "y": 60,
+        "wires": [
+            [
+                "7f1e5913.55d2e8"
+            ]
+        ]
+    },
+    {
+        "id": "7f1e5913.55d2e8",
+        "type": "file in",
+        "z": "370ea38b.107aa4",
+        "name": "",
+        "filename": "/home/pi/thalatta_rpi/packet_logs/log_27001.csv",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "x": 450,
+        "y": 60,
+        "wires": [
+            [
+                "c5c9e01.fd0e92"
+            ]
+        ]
+    },
+    {
+        "id": "c5c9e01.fd0e92",
+        "type": "csv",
+        "z": "370ea38b.107aa4",
+        "name": "",
+        "sep": ",",
+        "hdrin": true,
+        "hdrout": "",
+        "multi": "mult",
+        "ret": "\\n",
+        "temp": "",
+        "skip": "0",
+        "x": 410,
+        "y": 160,
+        "wires": [
+            [
+                "31412007.aee1a8"
+            ]
+        ]
+    },
+    {
+        "id": "cf6f731e.0dbd08",
+        "type": "debug",
+        "z": "370ea38b.107aa4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 990,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "31412007.aee1a8",
+        "type": "function",
+        "z": "370ea38b.107aa4",
+        "name": "Parse CSV",
+        "func": "var msg_parsed = {payload: 0};\n\nvar stats = {\n    nb_total_pkts:0,\n    nb_valid_pkts:0,\n    motes:[]\n};\n\nvar found;\nvar gw_found;\nvar mote_obj;\nvar idx;\nvar fcnt_start;\nvar fcnt_last;\nvar fcnt_buff;\nvar per;\n\nfor (var i in msg.payload) {\n    if (typeof msg.payload[i].data !== 'undefined') {\n        //\n        // total number of packets\n        //\n        stats.nb_total_pkts += 1;\n        \n        //\n        // get DevAddr from data payload\n        //\n        var mote_id = msg.payload[i].data.slice(2,10);\n        var mote_id_swap = mote_id.slice(6,8) + mote_id.slice(4,6) + mote_id.slice(2,4) + mote_id.slice(0,2);\n        //console.log(mote_id_swap);\n        mote_id = mote_id_swap;\n        \n        //\n        // filter invalid packets (not TTN)\n        //\n        if (mote_id.slice(0,4) !== \"2601\") {\n            //console.log(\"drop non TTN packet \" + msg.payload[i].data);\n            continue;\n        }\n        \n        //\n        // number of valid unique packets (will be updated later when duplicate detected)\n        //\n        stats.nb_valid_pkts += 1;\n        \n        //\n        // Add it in the mote list if not already existing\n        //\n        found = false;\n        for (j = 0; j < stats.motes.length; j++) {\n            if (stats.motes[j].devaddr === mote_id) {\n                found = true;\n                idx = j;\n                break;\n            }\n        }\n        if (found === false) {\n            // get FCnt of the first packet found for this mote\n            fcnt_buff = Buffer.from(msg.payload[i].data.slice(12,16), 'hex');\n            fcnt_start = (fcnt_buff[1] << 8) | fcnt_buff[0];\n            // Push to the array\n            mote_obj = {devaddr: mote_id, nb:1, reset:false, fcnt_start:fcnt_start, fcnt_last:fcnt_start, per:100.0, last_data:msg.payload[i].data, gw:[msg.payload[i].gw]};\n            stats.motes.push(mote_obj);\n            //console.log(\"pushed \" + mote_id);\n        } else {\n            // Check if the gw that received this packet is in the list, or add it\n            gw_found = false;\n            for (j = 0; j < stats.motes[idx].gw.length; j++) {\n                if (msg.payload[i].gw === stats.motes[idx].gw[j]) {\n                    gw_found = true;\n                    break;\n                }\n            }\n            if (gw_found === false) {\n                stats.motes[idx].gw.push(msg.payload[i].gw);\n            }\n            // Drop duplicates (same packet received by several different gws)\n            if (msg.payload[i].data === stats.motes[idx].last_data) {\n                //console.log(\"drop duplicate\");\n                stats.nb_valid_pkts -= 1;\n                continue;\n            } else {\n                stats.motes[idx].last_data = msg.payload[i].data;\n            }\n            // count the number of packets found for each mote\n            stats.motes[idx].nb += 1;\n            // Update fcnt_last with current packet\n            fcnt_buff = Buffer.from(msg.payload[i].data.slice(12,16), 'hex');\n            fcnt_last = (fcnt_buff[1] << 8) | fcnt_buff[0];\n            if (fcnt_last === 0) {\n                console.log(\"reset detected on \" + stats.motes[idx].devaddr);\n                stats.motes[idx].reset = true;\n            }\n            stats.motes[idx].fcnt_last = fcnt_last;\n            // Calculate PER\n            if (stats.motes[idx].reset === false) {\n                stats.motes[idx].per = (stats.motes[idx].nb / (stats.motes[idx].fcnt_last - stats.motes[idx].fcnt_start + 1)) * 100;\n                stats.motes[idx].per = stats.motes[idx].per.toFixed(1);\n            } else {\n                stats.motes[idx].per = \"?\";\n            }\n        }\n    }\n}\n\n//\n// Clean-up\n//\nfor (j = 0; j < stats.motes.length; j++) {\n    delete stats.motes[j].last_data;\n}\n\nmsg_parsed.payload = stats;\n\nreturn [msg, msg_parsed];",
+        "outputs": 2,
+        "noerr": 0,
+        "x": 510,
+        "y": 240,
+        "wires": [
+            [
+                "cf6f731e.0dbd08"
+            ],
+            [
+                "d9860d50.d5a258"
+            ]
+        ]
+    },
+    {
+        "id": "2801dd39.addd6a",
+        "type": "ui_template",
+        "z": "370ea38b.107aa4",
+        "group": "245dc3d0.062794",
+        "name": "",
+        "order": 0,
+        "width": "12",
+        "height": "6",
+        "format": "<style>\n    {{msg.style}}\n</style>\n\n<table>\n  <tr>\n    <th>DevAddr</th>\n    <th>Received</th>\n    <th>PER</th>\n    <th>GWs</th>\n  </tr>\n  <tr ng-repeat=\"obj in msg.payload.motes\">\n    <td>{{ obj.devaddr }}</td>\n    <td>{{ obj.nb }}</td>\n    <td>{{ obj.per }}</td>\n    <td>{{ obj.gw.join(', ') }}</td>\n  </tr>\n</table>",
+        "storeOutMessages": true,
+        "fwdInMessages": false,
+        "templateScope": "local",
+        "x": 840,
+        "y": 260,
+        "wires": [
+            [
+                "e816d5e.48724a8"
+            ]
+        ]
+    },
+    {
+        "id": "d9860d50.d5a258",
+        "type": "template",
+        "z": "370ea38b.107aa4",
+        "name": "css",
+        "field": "style",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "mustache",
+        "template": "table {\n    color: #333;\n    font-family: Helvetica, Arial, sans-serif;\n    width: 100%;\n    border-collapse: collapse;\n    border-spacing: 0;\n}\ntd, th {\n    border: 1px solid transparent;\n    /* No more visible border */\n    height: 30px;\n    transition: all 0.3s;\n    /* Simple transition for hover effect */\n}\nth {\n    background: #DFDFDF;\n    /* Darken header a bit */\n    font-weight: bold;\n}\ntd {\n    background: #FAFAFA;\n    text-align: center;\n}\n\n/* Cells in even rows (2,4,6...) are one color */\n\ntr:nth-child(even) td {\n    background: #F1F1F1;\n}\n\n/* Cells in odd rows (1,3,5...) are another (excludes header cells)  */\n\ntr:nth-child(odd) td {\n    background: #FEFEFE;\n}\ntr td:hover {\n    background: #666;\n    color: #FFF;\n}\n\n/* Hover cell effect! */",
+        "output": "str",
+        "x": 690,
+        "y": 260,
+        "wires": [
+            [
+                "2801dd39.addd6a"
+            ]
+        ]
+    },
+    {
+        "id": "e816d5e.48724a8",
+        "type": "debug",
+        "z": "370ea38b.107aa4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 990,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "245dc3d0.062794",
+        "type": "ui_group",
+        "z": "",
+        "name": "Status",
+        "tab": "4de8b58a.cddbac",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "4de8b58a.cddbac",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Thalatta",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    }
+]
