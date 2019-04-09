@@ -1,0 +1,124 @@
+# Login
+ttn-lw-cli -c ism2400-demo.yml login
+
+----------------------------------------
+
+# Gateway (create, subscribe...)
+## Create GW
+ttn-lw-cli -c ism2400-demo.yml gateway list-frequency-plans
+ttn-lw-cli -c ism2400-demo.yml gateway create gw-indoor-1 --user-id mcoracin --frequency-plan-id ISM_2400 --gateway-eui 0080E1FFFE2A0043
+ttn-lw-cli -c ism2400-demo.yml gtw collaborators set --gateway-id gw-indoor-1 --organization-id semtech --right-gateway-all
+
+## Subscribe to GW Traffic
+ttn-lw-cli -c ism2400-demo.yml events subscribe --gateway-id gw-indoor-1
+
+----------------------------------------
+
+# Application
+## Create Application
+ttn-lw-cli -c ism2400-demo.yml applications create thalatta-app --user-id mcoracin
+ttn-lw-cli -c ism2400-demo.yml apps collaborators set --application-id thalatta-app --organization-id semtech --right-application-all
+
+## Link Application Server to Network Server
+ttn-lw-cli -c ism2400-demo.yml applications api-keys create --name link --application-id thalatta-app --right-application-link
+
+  INFO API key ID: 7WCN6T5BWIIHQWIOVA76AD5BCNAPPMBSBRAL24I
+  INFO API key value: NNSXS.7WCN6T5BWIIHQWIOVA76AD5BCNAPPMBSBRAL24I.2JELN5PNRHZZ73CYVSOEYCMXEC27OC4ZELDJ36UOR5QXHRULXASQ
+  WARN The API key value will never be shown again
+  WARN Make sure to copy it to a safe place
+{
+  "id": "7WCN6T5BWIIHQWIOVA76AD5BCNAPPMBSBRAL24I",
+  "key": "NNSXS.7WCN6T5BWIIHQWIOVA76AD5BCNAPPMBSBRAL24I.2JELN5PNRHZZ73CYVSOEYCMXEC27OC4ZELDJ36UOR5QXHRULXASQ",
+  "name": "link",
+  "rights": [
+    "RIGHT_APPLICATION_LINK"
+  ]
+}
+
+ttn-lw-cli -c ism2400-demo.yml applications link set thalatta-app --api-key NNSXS.7WCN6T5BWIIHQWIOVA76AD5BCNAPPMBSBRAL24I.2JELN5PNRHZZ73CYVSOEYCMXEC27OC4ZELDJ36UOR5QXHRULXASQ
+{
+  "api_key": "NNSXS.7WCN6T5BWIIHQWIOVA76AD5BCNAPPMBSBRAL24I.2JELN5PNRHZZ73CYVSOEYCMXEC27OC4ZELDJ36UOR5QXHRULXASQ"
+}
+
+ttn-lw-cli -c ism2400-demo.yml applications api-keys create \
+  --name mqtt-client \
+  --application-id thalatta-app \
+  --right-application-traffic-read \
+  --right-application-traffic-down-write
+ 
+ INFO API key ID: VC7K3C34LF46MG2YLAKUHE2SHGYF3BKZJLWRFAA
+  INFO API key value: NNSXS.VC7K3C34LF46MG2YLAKUHE2SHGYF3BKZJLWRFAA.PD5XUSPEZSY3GNHMTTAR4GDJRNYYTBGZBBAEXPSEGUZU4LT3XJ4A
+  WARN The API key value will never be shown again
+  WARN Make sure to copy it to a safe place
+{
+  "id": "VC7K3C34LF46MG2YLAKUHE2SHGYF3BKZJLWRFAA",
+  "key": "NNSXS.VC7K3C34LF46MG2YLAKUHE2SHGYF3BKZJLWRFAA.PD5XUSPEZSY3GNHMTTAR4GDJRNYYTBGZBBAEXPSEGUZU4LT3XJ4A",
+  "name": "mqtt-client",
+  "rights": [
+    "RIGHT_APPLICATION_TRAFFIC_READ",
+    "RIGHT_APPLICATION_TRAFFIC_DOWN_WRITE"
+  ]
+}
+
+## Use MQTT server
+
+ttn-lw-cli -c ism2400-demo.yml applications api-keys create   --name mqtt-client   --application-id thalatta-app   --right-application-traffic-read   --right-application-traffic-down-write
+  INFO API key ID: FGQFLX4IHLHTQPSKUW3LC4G2XJZGAMA3BHCQESQ
+  INFO API key value: NNSXS.FGQFLX4IHLHTQPSKUW3LC4G2XJZGAMA3BHCQESQ.KUWEY7JVZGI4WVVNQ4QWO3G6P2U4KZ5LUYHWUJO5N5W3CF5OVQDQ
+  WARN The API key value will never be shown again
+  WARN Make sure to copy it to a safe place
+{
+  "id": "FGQFLX4IHLHTQPSKUW3LC4G2XJZGAMA3BHCQESQ",
+  "key": "NNSXS.FGQFLX4IHLHTQPSKUW3LC4G2XJZGAMA3BHCQESQ.KUWEY7JVZGI4WVVNQ4QWO3G6P2U4KZ5LUYHWUJO5N5W3CF5OVQDQ",
+  "name": "mqtt-client",
+  "rights": [
+    "RIGHT_APPLICATION_TRAFFIC_DOWN_WRITE",
+    "RIGHT_APPLICATION_TRAFFIC_READ"
+  ]
+}
+
+Node-red flow on lorae.ddns.net (to have TLS certificates):
+[{"id":"45c02cf8.f9398c","type":"tab","label":"TTN mqtt 2.4GHz","disabled":false,"info":""},{"id":"d6b3d71.03d14a8","type":"mqtt in","z":"45c02cf8.f9398c","name":"","topic":"#","qos":"2","broker":"195f398c.ff6d56","x":156.36666870117188,"y":120,"wires":[["c7530c20.60ab8"]]},{"id":"11e7d0c0.935867","type":"debug","z":"45c02cf8.f9398c","name":"toto","active":true,"console":"false","complete":"payload","x":490,"y":120,"wires":[]},{"id":"c7530c20.60ab8","type":"json","z":"45c02cf8.f9398c","name":"","pretty":false,"x":310,"y":120,"wires":[["11e7d0c0.935867"]]},{"id":"195f398c.ff6d56","type":"mqtt-broker","z":"","broker":"ism2400.demo.thethings.industries","port":"8883","tls":"e52cb189.9db4f","clientid":"","usetls":true,"compatmode":true,"keepalive":"60","cleansession":true,"willTopic":"","willQos":"0","willPayload":"","birthTopic":"","birthQos":"0","birthPayload":""},{"id":"e52cb189.9db4f","type":"tls-config","z":"","name":"","cert":"","key":"","ca":"/etc/ssl/certs/ca-certificates.crt","certname":"","keyname":"","caname":"","verifyservercert":false}]
+
+----------------------------------------
+
+
+# End-Devices
+## Create end-device
+ttn-lw-cli -c ism2400-demo.yml end-devices create thalatta-app sensor1 \
+  --frequency-plan-id ISM_2400 \
+  --lorawan-version 1.0.3 \
+  --lorawan-phy-version 1.0.3-a \
+  --abp \
+  --session.dev-addr 26011F75 \
+  --session.keys.app-s-key.key 44DAFF802DBD5A6B662424A2DA8FB4B9 \
+  --session.keys.nwk-s-key.key 44DAFF802DBD5A6B662424A2DA8FB4B9
+
+ttn-lw-cli -c ism2400-demo.yml end-devices create thalatta-app boat1 \
+  --frequency-plan-id ISM_2400 \
+  --lorawan-version 1.0.3 \
+  --lorawan-phy-version 1.0.3-a \
+  --abp \
+  --session.dev-addr 26011801 \
+  --session.keys.app-s-key.key 11222222222222222222222222222222 \
+  --session.keys.nwk-s-key.key 22331111111111111111111111111111 \
+  --mac-settings.rx1-delay=RX_DELAY_5
+
+## RX window delay
+for the Rx1 delay, you must set `--mac-settings.rx1-delay=RX_DELAY_1` on create of the device, if you use ABP.
+
+## Disable frame counter check
+ttn-lw-cli -c ism2400-demo.yml dev set thalatta-app sensor1 --mac-settings.resets-f-cnt=true
+ttn-lw-cli -c ism2400-demo.yml dev set thalatta-app boat1 --mac-settings.resets-f-cnt=true
+
+## Get full information from a end-device
+ttn-lw-cli -c ism2400-demo.yml dev get thalatta-app sensor1 --session --frequency-plan-id --lorawan-version --lorawan-phy-version
+
+## List end-devices
+ttn-lw-cli -c ism2400-demo.yml end-devices list thalatta-app
+
+----------------------------------------
+
+# Log on server to get logs
+ssh mcoracin@ism2400.demo.thethings.industries
+go to `/tti/lorawan-stack` and do a `docker-compose logs -f stack` there.

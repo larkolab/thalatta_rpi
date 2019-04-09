@@ -1,0 +1,10 @@
+oauth-server-address: https://ism2400.demo.thethings.industries:8885/oauth
+
+identity-server-grpc-address: ism2400.demo.thethings.industries:8884
+gateway-server-grpc-address: ism2400.demo.thethings.industries:8884
+network-server-grpc-address: ism2400.demo.thethings.industries:8884
+application-server-grpc-address: ism2400.demo.thethings.industries:8884
+join-server-grpc-address: ism2400.demo.thethings.industries:8884
+
+log:
+  level: info
