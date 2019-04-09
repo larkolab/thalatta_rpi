@@ -1,0 +1,13 @@
+If on Raspbian (usually), run:
+
+systemctl disable wpa_supplicant
+systemctl disable bluetooth
+systemctl disable hciuart
+
+Add to /boot/config.txt:
+
+# Disable WiFi and Bluetooth
+dtoverlay=pi3-disable-wifi
+dtoverlay=pi3-disable-bt
+
+Reboot.
