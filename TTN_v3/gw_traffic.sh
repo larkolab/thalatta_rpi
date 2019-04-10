@@ -2,7 +2,7 @@
 
 if [ $# -eq 0 ]
 then
-	echo "Missing gatewau-id argument"
+	echo "Missing gateway-id argument"
 	ttn-lw-cli -c ism2400-demo.yml gateway list
 	exit
 fi
