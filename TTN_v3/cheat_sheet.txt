@@ -114,6 +114,10 @@ ttn-lw-cli -c ism2400-demo.yml dev set thalatta-app boat1 --mac-settings.resets-
 ## Get full information from a end-device
 ttn-lw-cli -c ism2400-demo.yml dev get thalatta-app sensor1 --session --frequency-plan-id --lorawan-version --lorawan-phy-version
 
+## Update session DevAddr
+$ ttn-lw-cli -c ism2400-demo.yml dev set thalatta-app sensor1 --session.dev-addr=2601xxxx
+
+
 ## List end-devices
 ttn-lw-cli -c ism2400-demo.yml end-devices list thalatta-app
 
