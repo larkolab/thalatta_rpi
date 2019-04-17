@@ -84,7 +84,7 @@ Node-red flow on lorae.ddns.net (to have TLS certificates):
 
 
 # End-Devices
-## Create end-device
+## Create end-device (ABP)
 ttn-lw-cli -c ism2400-demo.yml end-devices create thalatta-app sensor1 \
   --frequency-plan-id ISM_2400 \
   --lorawan-version 1.0.3 \
@@ -103,6 +103,15 @@ ttn-lw-cli -c ism2400-demo.yml end-devices create thalatta-app boat1 \
   --session.keys.app-s-key.key 11222222222222222222222222222222 \
   --session.keys.nwk-s-key.key 22331111111111111111111111111111 \
   --mac-settings.rx1-delay=RX_DELAY_5
+
+## Create end-device (OTAA)
+ttn-lw-cli -c ism2400-demo.yml end-devices create thalatta-app verinco1 \
+  --dev-eui 414650130036003B \
+  --app-eui 70B3D57ED000FF50 \
+  --frequency-plan-id ISM_2400 \
+  --root-keys.app-key.key 11111111111111111111111111111111 \
+  --lorawan-version 1.0.3 \
+  --lorawan-phy-version 1.0.3-a
 
 ## RX window delay
 for the Rx1 delay, you must set `--mac-settings.rx1-delay=RX_DELAY_1` on create of the device, if you use ABP.
