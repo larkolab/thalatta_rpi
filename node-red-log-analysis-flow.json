@@ -1,0 +1,1019 @@
+[
+    {
+        "id": "f7aebf45.cca098",
+        "type": "tab",
+        "label": "Thalatta logs to DB",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "6eef74d2.4bf8bc",
+        "type": "file in",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "filename": "/home/mcoracin/work/thalatta/gw_mgmt_rxpk.log",
+        "format": "lines",
+        "chunk": false,
+        "sendError": false,
+        "x": 400,
+        "y": 60,
+        "wires": [
+            [
+                "1b438694.219649"
+            ]
+        ]
+    },
+    {
+        "id": "77b097a2.f9092",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 120,
+        "y": 60,
+        "wires": [
+            [
+                "6eef74d2.4bf8bc"
+            ]
+        ]
+    },
+    {
+        "id": "6cf05fc.a2a52a",
+        "type": "debug",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 1110,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "361f6b4c.793e2c",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "Parse DevAddr & change time format for MongoDB",
+        "func": "// Convert base64 to buffer\nvar b = new Buffer(msg.payload.payload.rxpk[0].data, 'base64')\nmsg.payload.payload.data = b.toString('hex');\n\nvar devaddr = new Buffer(4);\ndevaddr[0] = b[4];\ndevaddr[1] = b[3];\ndevaddr[2] = b[2];\ndevaddr[3] = b[1];\n\nmsg.payload.devaddr = devaddr.toString('hex');\n\n/*var isodate = new Date(msg.payload.time);\nmsg.payload.time = isodate.toISOString();*/\nmsg.payload.time = new Date(msg.payload.time);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 790,
+        "y": 140,
+        "wires": [
+            [
+                "6cf05fc.a2a52a",
+                "cfa377cd.9205b"
+            ]
+        ]
+    },
+    {
+        "id": "1b438694.219649",
+        "type": "json",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 510,
+        "y": 140,
+        "wires": [
+            [
+                "361f6b4c.793e2c"
+            ]
+        ]
+    },
+    {
+        "id": "cfa377cd.9205b",
+        "type": "mongodb out",
+        "z": "f7aebf45.cca098",
+        "mongodb": "b5db87ed.941968",
+        "name": "",
+        "collection": "rxpk",
+        "payonly": true,
+        "upsert": false,
+        "multi": false,
+        "operation": "insert",
+        "x": 1170,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "1de5ec35.eb29fc",
+        "type": "mongodb in",
+        "z": "f7aebf45.cca098",
+        "mongodb": "b5db87ed.941968",
+        "name": "",
+        "collection": "rxpk",
+        "operation": "find",
+        "x": 730,
+        "y": 460,
+        "wires": [
+            [
+                "cd4c833e.c1185"
+            ]
+        ]
+    },
+    {
+        "id": "b5c3c8e9.f2268",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011801",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 460,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "ea8cb956.2223",
+        "type": "debug",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 1310,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "a4531731.ed13d8",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "gw-outdoor-1 & boatX",
+        "func": "var filter_date = flow.get(\"filter_date\") || \"2019-04-11T12:00:00.000Z\";\n\nmsg.payload = { \"gwAddress\":\"0080E1FFFE410025\",\n                \"devaddr\":msg.topic, \n                \"time\" : { \"$gte\":new Date(filter_date)}\n                };\nmsg.projection = {\"_id\":0, \"time\":1, \"gwId\":1, \"devaddr\":1, \"payload.rxpk.freq\":1, \"payload.rxpk.rssi\":1, \"payload.rxpk.lsnr\":1};\nmsg.filename = \"/home/mcoracin/work/thalatta/\" + \"rxpk\" + \"_\" + \"gw-outdoor-1\" + \"_\" + msg.topic + \".csv\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 480,
+        "y": 460,
+        "wires": [
+            [
+                "1de5ec35.eb29fc"
+            ]
+        ]
+    },
+    {
+        "id": "cd4c833e.c1185",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "reformat array & stats",
+        "func": "var mathjs = context.global.mathjs;\n\n/* reformat inpu array to remove nesting */\nfor (i = 0; i < msg.payload.length; i++)\n{\n    msg.payload[i].freq = msg.payload[i].payload.rxpk[0].freq;\n    msg.payload[i].rssi = msg.payload[i].payload.rxpk[0].rssi;\n    msg.payload[i].snr = msg.payload[i].payload.rxpk[0].lsnr;\n    delete msg.payload[i].payload;\n}\n\n/* compute stats */\nvar msg_stats = {payload:{}};\n\nmsg_stats.payload.gwId = msg.payload[0].gwId;\nmsg_stats.payload.devaddr = msg.payload[0].devaddr;\nmsg_stats.payload.freq = msg.payload[0].freq;\n\nvar rssi_array = [];\nvar snr_array = [];\nfor (i = 0; i < msg.payload.length; i++)\n{\n    rssi_array.push(msg.payload[i].rssi);\n    snr_array.push(msg.payload[i].snr);\n}\n\nmsg_stats.payload.rssi_min = mathjs.min(rssi_array);\nmsg_stats.payload.rssi_max = mathjs.max(rssi_array);\nmsg_stats.payload.rssi_mean = mathjs.mean(rssi_array).toFixed(2);\nmsg_stats.payload.rssi_median = mathjs.median(rssi_array).toFixed(2);\n\nmsg_stats.payload.snr_min = mathjs.min(snr_array);\nmsg_stats.payload.snr_max = mathjs.max(snr_array);\nmsg_stats.payload.snr_mean = mathjs.mean(snr_array).toFixed(2);\nmsg_stats.payload.snr_median = mathjs.median(snr_array).toFixed(2);\n\nmsg_stats.payload.count = msg.payload.length;\n\nreturn [msg, msg_stats];",
+        "outputs": 2,
+        "noerr": 0,
+        "x": 980,
+        "y": 460,
+        "wires": [
+            [
+                "5ddbb961.e37c5"
+            ],
+            [
+                "a012f7f2.3ebaf"
+            ]
+        ]
+    },
+    {
+        "id": "5ddbb961.e37c5",
+        "type": "csv",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": true,
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "gwId, time, devaddr, freq, rssi, snr",
+        "skip": "0",
+        "x": 1170,
+        "y": 420,
+        "wires": [
+            [
+                "ea8cb956.2223",
+                "c89e6656.76f38"
+            ]
+        ]
+    },
+    {
+        "id": "c89e6656.76f38",
+        "type": "file",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "filename": "",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 1310,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "9b212c25.a8bb4",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011802",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 500,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "657fce5.bb9c63",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011803",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 1100,
+        "wires": [
+            [
+                "37a4a6c2.cd7c9a",
+                "43460be1.24a04c",
+                "a4531731.ed13d8"
+            ]
+        ]
+    },
+    {
+        "id": "ddeb5bd2.4da19",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011804",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 540,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "618720e9.f402b",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011805",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 580,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "8f2e3940.4265f",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011806",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 620,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "23a53b7b.90b294",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011807",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 660,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "79d8f492.c1c61c",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011808",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 700,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "89ec65be.8c6228",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011809",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 740,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "998d89f6.684a48",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011810",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 780,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "f0df8935.7751",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011811",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 820,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "a3baf481.4151d8",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011813",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 860,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "97a437df.369fa",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011814",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 900,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "34c5ea07.35a4a6",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011816",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 1140,
+        "wires": [
+            [
+                "37a4a6c2.cd7c9a",
+                "43460be1.24a04c",
+                "a4531731.ed13d8"
+            ]
+        ]
+    },
+    {
+        "id": "54b0d48c.540ffc",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011819",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 1180,
+        "wires": [
+            [
+                "37a4a6c2.cd7c9a",
+                "43460be1.24a04c",
+                "a4531731.ed13d8"
+            ]
+        ]
+    },
+    {
+        "id": "17653d50.44b223",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011820",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 980,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c",
+                "37a4a6c2.cd7c9a"
+            ]
+        ]
+    },
+    {
+        "id": "43460be1.24a04c",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "gw-outdoor-2 & boatX",
+        "func": "var filter_date = flow.get(\"filter_date\") || \"2019-04-11T12:00:00.000Z\";\n\nmsg.payload = { \"gwAddress\":\"0080E1FFFE320029\",\n                \"devaddr\":msg.topic, \n                \"time\" : { \"$gte\":new Date(filter_date)}\n                };\nmsg.projection = {\"_id\":0, \"time\":1, \"gwId\":1, \"devaddr\":1, \"payload.rxpk.freq\":1, \"payload.rxpk.rssi\":1, \"payload.rxpk.lsnr\":1};\nmsg.filename = \"/home/mcoracin/work/thalatta/\" + \"rxpk\" + \"_\" + \"gw-outdoor-2\" + \"_\" + msg.topic + \".csv\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 480,
+        "y": 740,
+        "wires": [
+            [
+                "ba530afb.d0de48"
+            ]
+        ]
+    },
+    {
+        "id": "37a4a6c2.cd7c9a",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "gw-indoor-1 & boatX",
+        "func": "var filter_date = flow.get(\"filter_date\") || \"2019-04-11T12:00:00.000Z\";\n\nmsg.payload = { \"gwAddress\":\"0080E1FFFE2A0043\",\n                \"devaddr\":msg.topic, \n                \"time\" : { \"$gte\":new Date(filter_date)}\n                };\nmsg.projection = {\"_id\":0, \"time\":1, \"gwId\":1, \"devaddr\":1, \"payload.rxpk.freq\":1, \"payload.rxpk.rssi\":1, \"payload.rxpk.lsnr\":1};\nmsg.filename = \"/home/mcoracin/work/thalatta/\" + \"rxpk\" + \"_\" + \"gw-indoor-1\" + \"_\" + msg.topic + \".csv\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 480,
+        "y": 1120,
+        "wires": [
+            [
+                "740f2403.e727e4"
+            ]
+        ]
+    },
+    {
+        "id": "2d96ec59.2eb934",
+        "type": "debug",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 1330,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "a012f7f2.3ebaf",
+        "type": "csv",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": false,
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "gwId, devaddr, freq, rssi_min, rssi_max, rssi_mean, rssi_median, snr_min, snr_max, snr_mean, snr_median,count",
+        "skip": "0",
+        "x": 1170,
+        "y": 520,
+        "wires": [
+            [
+                "d2c0945f.bcebe8",
+                "2d96ec59.2eb934"
+            ]
+        ]
+    },
+    {
+        "id": "d2c0945f.bcebe8",
+        "type": "file",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "filename": "/home/mcoracin/work/thalatta/rxpk_gw-outdoor-1_stats.csv",
+        "appendNewline": false,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 1470,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "93206399.364f68",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "CSV stat column names",
+        "topic": "",
+        "payload": "gwId,devaddr,freq,rssi_min,rssi_max,rssi_mean,rssi_median,snr_min,snr_max,snr_mean,snr_median,count",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 140,
+        "y": 420,
+        "wires": [
+            [
+                "ee745bc7.efc9f"
+            ]
+        ]
+    },
+    {
+        "id": "ee745bc7.efc9f",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "add line break",
+        "func": "msg.payload = msg.payload + '\\n';\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 460,
+        "y": 320,
+        "wires": [
+            [
+                "d2c0945f.bcebe8",
+                "9db142df.3260e",
+                "83af1aee.b4d5"
+            ]
+        ]
+    },
+    {
+        "id": "ba530afb.d0de48",
+        "type": "mongodb in",
+        "z": "f7aebf45.cca098",
+        "mongodb": "b5db87ed.941968",
+        "name": "",
+        "collection": "rxpk",
+        "operation": "find",
+        "x": 730,
+        "y": 740,
+        "wires": [
+            [
+                "ae819cd1.697ca"
+            ]
+        ]
+    },
+    {
+        "id": "e770e742.e5b828",
+        "type": "debug",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 1310,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "ae819cd1.697ca",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "reformat array & stats",
+        "func": "var mathjs = context.global.mathjs;\n\n/* reformat inpu array to remove nesting */\nfor (i = 0; i < msg.payload.length; i++)\n{\n    msg.payload[i].freq = msg.payload[i].payload.rxpk[0].freq;\n    msg.payload[i].rssi = msg.payload[i].payload.rxpk[0].rssi;\n    msg.payload[i].snr = msg.payload[i].payload.rxpk[0].lsnr;\n    delete msg.payload[i].payload;\n}\n\n/* compute stats */\nvar msg_stats = {payload:{}};\n\nmsg_stats.payload.gwId = msg.payload[0].gwId;\nmsg_stats.payload.devaddr = msg.payload[0].devaddr;\nmsg_stats.payload.freq = msg.payload[0].freq;\n\nvar rssi_array = [];\nvar snr_array = [];\nfor (i = 0; i < msg.payload.length; i++)\n{\n    rssi_array.push(msg.payload[i].rssi);\n    snr_array.push(msg.payload[i].snr);\n}\n\nmsg_stats.payload.rssi_min = mathjs.min(rssi_array);\nmsg_stats.payload.rssi_max = mathjs.max(rssi_array);\nmsg_stats.payload.rssi_mean = mathjs.mean(rssi_array).toFixed(2);\nmsg_stats.payload.rssi_median = mathjs.median(rssi_array).toFixed(2);\n\nmsg_stats.payload.snr_min = mathjs.min(snr_array);\nmsg_stats.payload.snr_max = mathjs.max(snr_array);\nmsg_stats.payload.snr_mean = mathjs.mean(snr_array).toFixed(2);\nmsg_stats.payload.snr_median = mathjs.median(snr_array).toFixed(2);\n\nmsg_stats.payload.count = msg.payload.length;\n\nreturn [msg, msg_stats];",
+        "outputs": 2,
+        "noerr": 0,
+        "x": 980,
+        "y": 740,
+        "wires": [
+            [
+                "6a45c4ac.6726ac"
+            ],
+            [
+                "57bd0a9b.6f89cc"
+            ]
+        ]
+    },
+    {
+        "id": "6a45c4ac.6726ac",
+        "type": "csv",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": true,
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "gwId, time, devaddr, freq, rssi, snr",
+        "skip": "0",
+        "x": 1170,
+        "y": 700,
+        "wires": [
+            [
+                "e770e742.e5b828",
+                "207e08cc.7a1848"
+            ]
+        ]
+    },
+    {
+        "id": "207e08cc.7a1848",
+        "type": "file",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "filename": "",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 1310,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "1e8cf0d8.44df67",
+        "type": "debug",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 1330,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "57bd0a9b.6f89cc",
+        "type": "csv",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": false,
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "gwId, devaddr, freq, rssi_min, rssi_max, rssi_mean, rssi_median, snr_min, snr_max, snr_mean, snr_median,count",
+        "skip": "0",
+        "x": 1170,
+        "y": 800,
+        "wires": [
+            [
+                "9db142df.3260e",
+                "1e8cf0d8.44df67"
+            ]
+        ]
+    },
+    {
+        "id": "9db142df.3260e",
+        "type": "file",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "filename": "/home/mcoracin/work/thalatta/rxpk_gw-outdoor-2_stats.csv",
+        "appendNewline": false,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 1470,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "740f2403.e727e4",
+        "type": "mongodb in",
+        "z": "f7aebf45.cca098",
+        "mongodb": "b5db87ed.941968",
+        "name": "",
+        "collection": "rxpk",
+        "operation": "find",
+        "x": 730,
+        "y": 1120,
+        "wires": [
+            [
+                "e4793d58.25627"
+            ]
+        ]
+    },
+    {
+        "id": "57a79506.dec0e4",
+        "type": "debug",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 1310,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "e4793d58.25627",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "reformat array & stats",
+        "func": "var mathjs = context.global.mathjs;\n\n/* reformat inpu array to remove nesting */\nfor (i = 0; i < msg.payload.length; i++)\n{\n    msg.payload[i].freq = msg.payload[i].payload.rxpk[0].freq;\n    msg.payload[i].rssi = msg.payload[i].payload.rxpk[0].rssi;\n    msg.payload[i].snr = msg.payload[i].payload.rxpk[0].lsnr;\n    delete msg.payload[i].payload;\n}\n\n/* compute stats */\nvar msg_stats = {payload:{}};\n\nmsg_stats.payload.gwId = msg.payload[0].gwId;\nmsg_stats.payload.devaddr = msg.payload[0].devaddr;\nmsg_stats.payload.freq = msg.payload[0].freq;\n\nvar rssi_array = [];\nvar snr_array = [];\nfor (i = 0; i < msg.payload.length; i++)\n{\n    rssi_array.push(msg.payload[i].rssi);\n    snr_array.push(msg.payload[i].snr);\n}\n\nmsg_stats.payload.rssi_min = mathjs.min(rssi_array);\nmsg_stats.payload.rssi_max = mathjs.max(rssi_array);\nmsg_stats.payload.rssi_mean = mathjs.mean(rssi_array).toFixed(2);\nmsg_stats.payload.rssi_median = mathjs.median(rssi_array).toFixed(2);\n\nmsg_stats.payload.snr_min = mathjs.min(snr_array);\nmsg_stats.payload.snr_max = mathjs.max(snr_array);\nmsg_stats.payload.snr_mean = mathjs.mean(snr_array).toFixed(2);\nmsg_stats.payload.snr_median = mathjs.median(snr_array).toFixed(2);\n\nmsg_stats.payload.count = msg.payload.length;\n\nreturn [msg, msg_stats];",
+        "outputs": 2,
+        "noerr": 0,
+        "x": 980,
+        "y": 1120,
+        "wires": [
+            [
+                "cea7ebf.856cf98"
+            ],
+            [
+                "e382beb7.67e7a"
+            ]
+        ]
+    },
+    {
+        "id": "cea7ebf.856cf98",
+        "type": "csv",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": true,
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "gwId, time, devaddr, freq, rssi, snr",
+        "skip": "0",
+        "x": 1170,
+        "y": 1080,
+        "wires": [
+            [
+                "57a79506.dec0e4",
+                "5586972a.067b9"
+            ]
+        ]
+    },
+    {
+        "id": "5586972a.067b9",
+        "type": "file",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "filename": "",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 1310,
+        "y": 1080,
+        "wires": []
+    },
+    {
+        "id": "a96161f3.73c3",
+        "type": "debug",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 1330,
+        "y": 1180,
+        "wires": []
+    },
+    {
+        "id": "e382beb7.67e7a",
+        "type": "csv",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": false,
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "gwId, devaddr, freq, rssi_min, rssi_max, rssi_mean, rssi_median, snr_min, snr_max, snr_mean, snr_median,count",
+        "skip": "0",
+        "x": 1170,
+        "y": 1180,
+        "wires": [
+            [
+                "83af1aee.b4d5",
+                "a96161f3.73c3"
+            ]
+        ]
+    },
+    {
+        "id": "83af1aee.b4d5",
+        "type": "file",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "filename": "/home/mcoracin/work/thalatta/rxpk_gw-indoor-1_stats.csv",
+        "appendNewline": false,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 1470,
+        "y": 1140,
+        "wires": []
+    },
+    {
+        "id": "98b8378.bd2b7c8",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "Set start time & date",
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 260,
+        "wires": [
+            [
+                "b6392d84.0a4e98"
+            ]
+        ]
+    },
+    {
+        "id": "b6392d84.0a4e98",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "Set date & time",
+        "func": "var UPDATE_ME = \"2019-04-13T20:00:00.000Z\";\n\nflow.set(\"filter_date\", UPDATE_ME);\n\nmsg.payload = UPDATE_ME;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 360,
+        "y": 260,
+        "wires": [
+            [
+                "f8246c8b.5e87d"
+            ]
+        ]
+    },
+    {
+        "id": "f8246c8b.5e87d",
+        "type": "debug",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 590,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "8fa8f333.0fe038",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "26011818",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 130,
+        "y": 940,
+        "wires": [
+            [
+                "a4531731.ed13d8",
+                "43460be1.24a04c"
+            ]
+        ]
+    },
+    {
+        "id": "b5db87ed.941968",
+        "type": "mongodb",
+        "z": "",
+        "hostname": "127.0.0.1",
+        "port": "27017",
+        "db": "THALATTA",
+        "name": ""
+    }
+]
