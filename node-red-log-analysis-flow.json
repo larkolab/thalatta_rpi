@@ -53,8 +53,8 @@
         "console": false,
         "tostatus": false,
         "complete": "payload",
-        "x": 1110,
-        "y": 100,
+        "x": 1270,
+        "y": 20,
         "wires": []
     },
     {
@@ -65,8 +65,8 @@
         "func": "// Convert base64 to buffer\nvar b = new Buffer(msg.payload.payload.rxpk[0].data, 'base64')\nmsg.payload.payload.data = b.toString('hex');\n\nvar devaddr = new Buffer(4);\ndevaddr[0] = b[4];\ndevaddr[1] = b[3];\ndevaddr[2] = b[2];\ndevaddr[3] = b[1];\n\nmsg.payload.devaddr = devaddr.toString('hex');\n\n/*var isodate = new Date(msg.payload.time);\nmsg.payload.time = isodate.toISOString();*/\nmsg.payload.time = new Date(msg.payload.time);\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 790,
-        "y": 140,
+        "x": 950,
+        "y": 60,
         "wires": [
             [
                 "6cf05fc.a2a52a",
@@ -82,8 +82,8 @@
         "property": "payload",
         "action": "",
         "pretty": false,
-        "x": 510,
-        "y": 140,
+        "x": 670,
+        "y": 60,
         "wires": [
             [
                 "361f6b4c.793e2c"
@@ -101,8 +101,8 @@
         "upsert": false,
         "multi": false,
         "operation": "insert",
-        "x": 1170,
-        "y": 140,
+        "x": 1330,
+        "y": 60,
         "wires": []
     },
     {
@@ -113,8 +113,8 @@
         "name": "",
         "collection": "rxpk",
         "operation": "find",
-        "x": 730,
-        "y": 460,
+        "x": 750,
+        "y": 480,
         "wires": [
             [
                 "cd4c833e.c1185"
@@ -133,8 +133,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 460,
+        "x": 150,
+        "y": 480,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -153,8 +153,8 @@
         "console": false,
         "tostatus": false,
         "complete": "true",
-        "x": 1310,
-        "y": 380,
+        "x": 1330,
+        "y": 400,
         "wires": []
     },
     {
@@ -165,8 +165,8 @@
         "func": "var filter_date = flow.get(\"filter_date\") || \"2019-04-11T12:00:00.000Z\";\n\nmsg.payload = { \"gwAddress\":\"0080E1FFFE410025\",\n                \"devaddr\":msg.topic, \n                \"time\" : { \"$gte\":new Date(filter_date)}\n                };\nmsg.projection = {\"_id\":0, \"time\":1, \"gwId\":1, \"devaddr\":1, \"payload.rxpk.freq\":1, \"payload.rxpk.rssi\":1, \"payload.rxpk.lsnr\":1};\nmsg.filename = \"/home/mcoracin/work/thalatta/\" + \"rxpk\" + \"_\" + \"gw-outdoor-1\" + \"_\" + msg.topic + \".csv\";\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 480,
-        "y": 460,
+        "x": 500,
+        "y": 480,
         "wires": [
             [
                 "1de5ec35.eb29fc"
@@ -181,8 +181,8 @@
         "func": "var mathjs = context.global.mathjs;\n\n/* reformat inpu array to remove nesting */\nfor (i = 0; i < msg.payload.length; i++)\n{\n    msg.payload[i].freq = msg.payload[i].payload.rxpk[0].freq;\n    msg.payload[i].rssi = msg.payload[i].payload.rxpk[0].rssi;\n    msg.payload[i].snr = msg.payload[i].payload.rxpk[0].lsnr;\n    delete msg.payload[i].payload;\n}\n\n/* compute stats */\nvar msg_stats = {payload:{}};\n\nmsg_stats.payload.gwId = msg.payload[0].gwId;\nmsg_stats.payload.devaddr = msg.payload[0].devaddr;\nmsg_stats.payload.freq = msg.payload[0].freq;\n\nvar rssi_array = [];\nvar snr_array = [];\nfor (i = 0; i < msg.payload.length; i++)\n{\n    rssi_array.push(msg.payload[i].rssi);\n    snr_array.push(msg.payload[i].snr);\n}\n\nmsg_stats.payload.rssi_min = mathjs.min(rssi_array);\nmsg_stats.payload.rssi_max = mathjs.max(rssi_array);\nmsg_stats.payload.rssi_mean = mathjs.mean(rssi_array).toFixed(2);\nmsg_stats.payload.rssi_median = mathjs.median(rssi_array).toFixed(2);\n\nmsg_stats.payload.snr_min = mathjs.min(snr_array);\nmsg_stats.payload.snr_max = mathjs.max(snr_array);\nmsg_stats.payload.snr_mean = mathjs.mean(snr_array).toFixed(2);\nmsg_stats.payload.snr_median = mathjs.median(snr_array).toFixed(2);\n\nmsg_stats.payload.count = msg.payload.length;\n\nreturn [msg, msg_stats];",
         "outputs": 2,
         "noerr": 0,
-        "x": 980,
-        "y": 460,
+        "x": 1000,
+        "y": 480,
         "wires": [
             [
                 "5ddbb961.e37c5"
@@ -204,8 +204,8 @@
         "ret": "\\n",
         "temp": "gwId, time, devaddr, freq, rssi, snr",
         "skip": "0",
-        "x": 1170,
-        "y": 420,
+        "x": 1190,
+        "y": 440,
         "wires": [
             [
                 "ea8cb956.2223",
@@ -222,8 +222,8 @@
         "appendNewline": true,
         "createDir": false,
         "overwriteFile": "false",
-        "x": 1310,
-        "y": 420,
+        "x": 1330,
+        "y": 440,
         "wires": []
     },
     {
@@ -238,8 +238,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 500,
+        "x": 150,
+        "y": 520,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -260,8 +260,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 1100,
+        "x": 150,
+        "y": 1120,
         "wires": [
             [
                 "37a4a6c2.cd7c9a",
@@ -282,8 +282,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 540,
+        "x": 150,
+        "y": 560,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -304,8 +304,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 580,
+        "x": 150,
+        "y": 600,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -326,8 +326,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 620,
+        "x": 150,
+        "y": 640,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -348,8 +348,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 660,
+        "x": 150,
+        "y": 680,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -370,8 +370,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 700,
+        "x": 150,
+        "y": 720,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -392,8 +392,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 740,
+        "x": 150,
+        "y": 760,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -414,8 +414,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 780,
+        "x": 150,
+        "y": 800,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -436,8 +436,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 820,
+        "x": 150,
+        "y": 840,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -458,8 +458,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 860,
+        "x": 150,
+        "y": 880,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -480,8 +480,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 900,
+        "x": 150,
+        "y": 920,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -502,8 +502,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 1140,
+        "x": 150,
+        "y": 1160,
         "wires": [
             [
                 "37a4a6c2.cd7c9a",
@@ -524,8 +524,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 1180,
+        "x": 150,
+        "y": 1200,
         "wires": [
             [
                 "37a4a6c2.cd7c9a",
@@ -546,8 +546,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 980,
+        "x": 150,
+        "y": 1000,
         "wires": [
             [
                 "a4531731.ed13d8",
@@ -564,8 +564,8 @@
         "func": "var filter_date = flow.get(\"filter_date\") || \"2019-04-11T12:00:00.000Z\";\n\nmsg.payload = { \"gwAddress\":\"0080E1FFFE320029\",\n                \"devaddr\":msg.topic, \n                \"time\" : { \"$gte\":new Date(filter_date)}\n                };\nmsg.projection = {\"_id\":0, \"time\":1, \"gwId\":1, \"devaddr\":1, \"payload.rxpk.freq\":1, \"payload.rxpk.rssi\":1, \"payload.rxpk.lsnr\":1};\nmsg.filename = \"/home/mcoracin/work/thalatta/\" + \"rxpk\" + \"_\" + \"gw-outdoor-2\" + \"_\" + msg.topic + \".csv\";\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 480,
-        "y": 740,
+        "x": 500,
+        "y": 760,
         "wires": [
             [
                 "ba530afb.d0de48"
@@ -580,8 +580,8 @@
         "func": "var filter_date = flow.get(\"filter_date\") || \"2019-04-11T12:00:00.000Z\";\n\nmsg.payload = { \"gwAddress\":\"0080E1FFFE2A0043\",\n                \"devaddr\":msg.topic, \n                \"time\" : { \"$gte\":new Date(filter_date)}\n                };\nmsg.projection = {\"_id\":0, \"time\":1, \"gwId\":1, \"devaddr\":1, \"payload.rxpk.freq\":1, \"payload.rxpk.rssi\":1, \"payload.rxpk.lsnr\":1};\nmsg.filename = \"/home/mcoracin/work/thalatta/\" + \"rxpk\" + \"_\" + \"gw-indoor-1\" + \"_\" + msg.topic + \".csv\";\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 480,
-        "y": 1120,
+        "x": 500,
+        "y": 1140,
         "wires": [
             [
                 "740f2403.e727e4"
@@ -598,8 +598,8 @@
         "console": false,
         "tostatus": false,
         "complete": "payload",
-        "x": 1330,
-        "y": 520,
+        "x": 1350,
+        "y": 540,
         "wires": []
     },
     {
@@ -614,8 +614,8 @@
         "ret": "\\n",
         "temp": "gwId, devaddr, freq, rssi_min, rssi_max, rssi_mean, rssi_median, snr_min, snr_max, snr_mean, snr_median,count",
         "skip": "0",
-        "x": 1170,
-        "y": 520,
+        "x": 1190,
+        "y": 540,
         "wires": [
             [
                 "d2c0945f.bcebe8",
@@ -632,8 +632,8 @@
         "appendNewline": false,
         "createDir": false,
         "overwriteFile": "false",
-        "x": 1470,
-        "y": 480,
+        "x": 1490,
+        "y": 500,
         "wires": []
     },
     {
@@ -648,8 +648,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 140,
-        "y": 420,
+        "x": 160,
+        "y": 440,
         "wires": [
             [
                 "ee745bc7.efc9f"
@@ -664,8 +664,8 @@
         "func": "msg.payload = msg.payload + '\\n';\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 460,
-        "y": 320,
+        "x": 480,
+        "y": 340,
         "wires": [
             [
                 "d2c0945f.bcebe8",
@@ -682,8 +682,8 @@
         "name": "",
         "collection": "rxpk",
         "operation": "find",
-        "x": 730,
-        "y": 740,
+        "x": 750,
+        "y": 760,
         "wires": [
             [
                 "ae819cd1.697ca"
@@ -700,8 +700,8 @@
         "console": false,
         "tostatus": false,
         "complete": "true",
-        "x": 1310,
-        "y": 660,
+        "x": 1330,
+        "y": 680,
         "wires": []
     },
     {
@@ -712,8 +712,8 @@
         "func": "var mathjs = context.global.mathjs;\n\n/* reformat inpu array to remove nesting */\nfor (i = 0; i < msg.payload.length; i++)\n{\n    msg.payload[i].freq = msg.payload[i].payload.rxpk[0].freq;\n    msg.payload[i].rssi = msg.payload[i].payload.rxpk[0].rssi;\n    msg.payload[i].snr = msg.payload[i].payload.rxpk[0].lsnr;\n    delete msg.payload[i].payload;\n}\n\n/* compute stats */\nvar msg_stats = {payload:{}};\n\nmsg_stats.payload.gwId = msg.payload[0].gwId;\nmsg_stats.payload.devaddr = msg.payload[0].devaddr;\nmsg_stats.payload.freq = msg.payload[0].freq;\n\nvar rssi_array = [];\nvar snr_array = [];\nfor (i = 0; i < msg.payload.length; i++)\n{\n    rssi_array.push(msg.payload[i].rssi);\n    snr_array.push(msg.payload[i].snr);\n}\n\nmsg_stats.payload.rssi_min = mathjs.min(rssi_array);\nmsg_stats.payload.rssi_max = mathjs.max(rssi_array);\nmsg_stats.payload.rssi_mean = mathjs.mean(rssi_array).toFixed(2);\nmsg_stats.payload.rssi_median = mathjs.median(rssi_array).toFixed(2);\n\nmsg_stats.payload.snr_min = mathjs.min(snr_array);\nmsg_stats.payload.snr_max = mathjs.max(snr_array);\nmsg_stats.payload.snr_mean = mathjs.mean(snr_array).toFixed(2);\nmsg_stats.payload.snr_median = mathjs.median(snr_array).toFixed(2);\n\nmsg_stats.payload.count = msg.payload.length;\n\nreturn [msg, msg_stats];",
         "outputs": 2,
         "noerr": 0,
-        "x": 980,
-        "y": 740,
+        "x": 1000,
+        "y": 760,
         "wires": [
             [
                 "6a45c4ac.6726ac"
@@ -735,8 +735,8 @@
         "ret": "\\n",
         "temp": "gwId, time, devaddr, freq, rssi, snr",
         "skip": "0",
-        "x": 1170,
-        "y": 700,
+        "x": 1190,
+        "y": 720,
         "wires": [
             [
                 "e770e742.e5b828",
@@ -753,8 +753,8 @@
         "appendNewline": true,
         "createDir": false,
         "overwriteFile": "false",
-        "x": 1310,
-        "y": 700,
+        "x": 1330,
+        "y": 720,
         "wires": []
     },
     {
@@ -767,8 +767,8 @@
         "console": false,
         "tostatus": false,
         "complete": "payload",
-        "x": 1330,
-        "y": 800,
+        "x": 1350,
+        "y": 820,
         "wires": []
     },
     {
@@ -783,8 +783,8 @@
         "ret": "\\n",
         "temp": "gwId, devaddr, freq, rssi_min, rssi_max, rssi_mean, rssi_median, snr_min, snr_max, snr_mean, snr_median,count",
         "skip": "0",
-        "x": 1170,
-        "y": 800,
+        "x": 1190,
+        "y": 820,
         "wires": [
             [
                 "9db142df.3260e",
@@ -801,8 +801,8 @@
         "appendNewline": false,
         "createDir": false,
         "overwriteFile": "false",
-        "x": 1470,
-        "y": 760,
+        "x": 1490,
+        "y": 780,
         "wires": []
     },
     {
@@ -813,8 +813,8 @@
         "name": "",
         "collection": "rxpk",
         "operation": "find",
-        "x": 730,
-        "y": 1120,
+        "x": 750,
+        "y": 1140,
         "wires": [
             [
                 "e4793d58.25627"
@@ -831,8 +831,8 @@
         "console": false,
         "tostatus": false,
         "complete": "true",
-        "x": 1310,
-        "y": 1040,
+        "x": 1330,
+        "y": 1060,
         "wires": []
     },
     {
@@ -843,8 +843,8 @@
         "func": "var mathjs = context.global.mathjs;\n\n/* reformat inpu array to remove nesting */\nfor (i = 0; i < msg.payload.length; i++)\n{\n    msg.payload[i].freq = msg.payload[i].payload.rxpk[0].freq;\n    msg.payload[i].rssi = msg.payload[i].payload.rxpk[0].rssi;\n    msg.payload[i].snr = msg.payload[i].payload.rxpk[0].lsnr;\n    delete msg.payload[i].payload;\n}\n\n/* compute stats */\nvar msg_stats = {payload:{}};\n\nmsg_stats.payload.gwId = msg.payload[0].gwId;\nmsg_stats.payload.devaddr = msg.payload[0].devaddr;\nmsg_stats.payload.freq = msg.payload[0].freq;\n\nvar rssi_array = [];\nvar snr_array = [];\nfor (i = 0; i < msg.payload.length; i++)\n{\n    rssi_array.push(msg.payload[i].rssi);\n    snr_array.push(msg.payload[i].snr);\n}\n\nmsg_stats.payload.rssi_min = mathjs.min(rssi_array);\nmsg_stats.payload.rssi_max = mathjs.max(rssi_array);\nmsg_stats.payload.rssi_mean = mathjs.mean(rssi_array).toFixed(2);\nmsg_stats.payload.rssi_median = mathjs.median(rssi_array).toFixed(2);\n\nmsg_stats.payload.snr_min = mathjs.min(snr_array);\nmsg_stats.payload.snr_max = mathjs.max(snr_array);\nmsg_stats.payload.snr_mean = mathjs.mean(snr_array).toFixed(2);\nmsg_stats.payload.snr_median = mathjs.median(snr_array).toFixed(2);\n\nmsg_stats.payload.count = msg.payload.length;\n\nreturn [msg, msg_stats];",
         "outputs": 2,
         "noerr": 0,
-        "x": 980,
-        "y": 1120,
+        "x": 1000,
+        "y": 1140,
         "wires": [
             [
                 "cea7ebf.856cf98"
@@ -866,8 +866,8 @@
         "ret": "\\n",
         "temp": "gwId, time, devaddr, freq, rssi, snr",
         "skip": "0",
-        "x": 1170,
-        "y": 1080,
+        "x": 1190,
+        "y": 1100,
         "wires": [
             [
                 "57a79506.dec0e4",
@@ -884,8 +884,8 @@
         "appendNewline": true,
         "createDir": false,
         "overwriteFile": "false",
-        "x": 1310,
-        "y": 1080,
+        "x": 1330,
+        "y": 1100,
         "wires": []
     },
     {
@@ -898,8 +898,8 @@
         "console": false,
         "tostatus": false,
         "complete": "payload",
-        "x": 1330,
-        "y": 1180,
+        "x": 1350,
+        "y": 1200,
         "wires": []
     },
     {
@@ -914,8 +914,8 @@
         "ret": "\\n",
         "temp": "gwId, devaddr, freq, rssi_min, rssi_max, rssi_mean, rssi_median, snr_min, snr_max, snr_mean, snr_median,count",
         "skip": "0",
-        "x": 1170,
-        "y": 1180,
+        "x": 1190,
+        "y": 1200,
         "wires": [
             [
                 "83af1aee.b4d5",
@@ -932,8 +932,8 @@
         "appendNewline": false,
         "createDir": false,
         "overwriteFile": "false",
-        "x": 1470,
-        "y": 1140,
+        "x": 1490,
+        "y": 1160,
         "wires": []
     },
     {
@@ -948,8 +948,8 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 260,
+        "x": 150,
+        "y": 280,
         "wires": [
             [
                 "b6392d84.0a4e98"
@@ -964,8 +964,8 @@
         "func": "var UPDATE_ME = \"2019-04-13T20:00:00.000Z\";\n\nflow.set(\"filter_date\", UPDATE_ME);\n\nmsg.payload = UPDATE_ME;\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 360,
-        "y": 260,
+        "x": 380,
+        "y": 280,
         "wires": [
             [
                 "f8246c8b.5e87d"
@@ -982,8 +982,8 @@
         "console": false,
         "tostatus": false,
         "complete": "false",
-        "x": 590,
-        "y": 260,
+        "x": 610,
+        "y": 280,
         "wires": []
     },
     {
@@ -998,14 +998,345 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 130,
-        "y": 940,
+        "x": 150,
+        "y": 960,
         "wires": [
             [
                 "a4531731.ed13d8",
                 "43460be1.24a04c"
             ]
         ]
+    },
+    {
+        "id": "2db312ab.aca436",
+        "type": "file in",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "filename": "/home/mcoracin/work/thalatta/gw_mgmt_stat.log",
+        "format": "lines",
+        "chunk": false,
+        "sendError": false,
+        "x": 400,
+        "y": 160,
+        "wires": [
+            [
+                "1a144fac.4b50b"
+            ]
+        ]
+    },
+    {
+        "id": "48bc86ec.cce1d",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 120,
+        "y": 160,
+        "wires": [
+            [
+                "2db312ab.aca436"
+            ]
+        ]
+    },
+    {
+        "id": "78023fcc.2e169",
+        "type": "debug",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 1270,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "a775e51d.cca26",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "Change time format for MongoDB",
+        "func": "/*var isodate = new Date(msg.payload.time);\nmsg.payload.time = isodate.toISOString();*/\nmsg.payload.time = new Date(msg.payload.time);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 890,
+        "y": 160,
+        "wires": [
+            [
+                "78023fcc.2e169",
+                "1fae31c3.53d8d6"
+            ]
+        ]
+    },
+    {
+        "id": "1a144fac.4b50b",
+        "type": "json",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 670,
+        "y": 160,
+        "wires": [
+            [
+                "a775e51d.cca26"
+            ]
+        ]
+    },
+    {
+        "id": "1fae31c3.53d8d6",
+        "type": "mongodb out",
+        "z": "f7aebf45.cca098",
+        "mongodb": "b5db87ed.941968",
+        "name": "",
+        "collection": "stat",
+        "payonly": true,
+        "upsert": false,
+        "multi": false,
+        "operation": "insert",
+        "x": 1330,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "225a8816.0220b8",
+        "type": "mongodb in",
+        "z": "f7aebf45.cca098",
+        "mongodb": "b5db87ed.941968",
+        "name": "",
+        "collection": "stat",
+        "operation": "find",
+        "x": 750,
+        "y": 1340,
+        "wires": [
+            [
+                "6937ebbc.554b4c"
+            ]
+        ]
+    },
+    {
+        "id": "8bd7dc17.ad1a6",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "gw-outdoor-1 reset",
+        "func": "var filter_date = flow.get(\"filter_date\") || \"2019-04-11T12:00:00.000Z\";\n\nmsg.payload = { \"gwAddress\":\"0080E1FFFE410025\",\n                \"time\" : { \"$gte\":new Date(filter_date)}\n                };\nmsg.projection = {\"_id\":0, \"time\":1, \"gwId\":1, \"payload.stat.rst\":1};\nmsg.filename = \"/home/mcoracin/work/thalatta/\" + \"stat\" + \"_\" + \"gw-outdoor-1\" + \".csv\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 490,
+        "y": 1340,
+        "wires": [
+            [
+                "225a8816.0220b8"
+            ]
+        ]
+    },
+    {
+        "id": "e0e54f6e.dcd438",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 180,
+        "y": 1340,
+        "wires": [
+            [
+                "8bd7dc17.ad1a6"
+            ]
+        ]
+    },
+    {
+        "id": "6376ebf2.058e74",
+        "type": "debug",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 1350,
+        "y": 1340,
+        "wires": []
+    },
+    {
+        "id": "6937ebbc.554b4c",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "reformat result",
+        "func": "for (i = 0; i < msg.payload.length; i++)\n{\n    msg.payload[i].rst = msg.payload[i].payload.stat.rst;\n    delete msg.payload[i].payload;\n    \n    var date = new Date(msg.payload[i].time);\n    var milliseconds = date.getTime();\n    msg.payload[i].time_ms = milliseconds;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 980,
+        "y": 1340,
+        "wires": [
+            [
+                "414c484b.4aec3"
+            ]
+        ]
+    },
+    {
+        "id": "414c484b.4aec3",
+        "type": "csv",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": true,
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "gwId, time, time_ms, rst",
+        "skip": "0",
+        "x": 1190,
+        "y": 1340,
+        "wires": [
+            [
+                "6376ebf2.058e74",
+                "3277b0bb.4b3428"
+            ]
+        ]
+    },
+    {
+        "id": "3277b0bb.4b3428",
+        "type": "file",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "filename": "",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 1330,
+        "y": 1380,
+        "wires": []
+    },
+    {
+        "id": "2862bba2.a9bd3c",
+        "type": "mongodb in",
+        "z": "f7aebf45.cca098",
+        "mongodb": "b5db87ed.941968",
+        "name": "",
+        "collection": "stat",
+        "operation": "find",
+        "x": 750,
+        "y": 1440,
+        "wires": [
+            [
+                "179b03f4.fdfb3c"
+            ]
+        ]
+    },
+    {
+        "id": "bfc7fc91.a8ebc",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "gw-outdoor-2 reset",
+        "func": "var filter_date = flow.get(\"filter_date\") || \"2019-04-11T12:00:00.000Z\";\n\nmsg.payload = { \"gwAddress\":\"0080E1FFFE320029\",\n                \"time\" : { \"$gte\":new Date(filter_date)}\n                };\nmsg.projection = {\"_id\":0, \"time\":1, \"gwId\":1, \"payload.stat.rst\":1};\nmsg.filename = \"/home/mcoracin/work/thalatta/\" + \"stat\" + \"_\" + \"gw-outdoor-2\" + \".csv\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 490,
+        "y": 1440,
+        "wires": [
+            [
+                "2862bba2.a9bd3c"
+            ]
+        ]
+    },
+    {
+        "id": "489eb9e6.5a401",
+        "type": "inject",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 180,
+        "y": 1440,
+        "wires": [
+            [
+                "bfc7fc91.a8ebc"
+            ]
+        ]
+    },
+    {
+        "id": "adbbc0f4.5e6738",
+        "type": "debug",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 1350,
+        "y": 1440,
+        "wires": []
+    },
+    {
+        "id": "179b03f4.fdfb3c",
+        "type": "function",
+        "z": "f7aebf45.cca098",
+        "name": "reformat result",
+        "func": "for (i = 0; i < msg.payload.length; i++)\n{\n    msg.payload[i].rst = msg.payload[i].payload.stat.rst;\n    delete msg.payload[i].payload;\n    \n    var date = new Date(msg.payload[i].time);\n    var milliseconds = date.getTime();\n    msg.payload[i].time_ms = milliseconds;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 980,
+        "y": 1440,
+        "wires": [
+            [
+                "c34e0177.445ab8"
+            ]
+        ]
+    },
+    {
+        "id": "c34e0177.445ab8",
+        "type": "csv",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": true,
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "gwId, time, time_ms, rst",
+        "skip": "0",
+        "x": 1190,
+        "y": 1440,
+        "wires": [
+            [
+                "adbbc0f4.5e6738",
+                "327c32d1.27c326"
+            ]
+        ]
+    },
+    {
+        "id": "327c32d1.27c326",
+        "type": "file",
+        "z": "f7aebf45.cca098",
+        "name": "",
+        "filename": "",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 1330,
+        "y": 1480,
+        "wires": []
     },
     {
         "id": "b5db87ed.941968",
